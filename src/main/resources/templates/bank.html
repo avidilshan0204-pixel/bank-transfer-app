@@ -27,34 +27,33 @@
 
     <!-- ===== Alerts ===== -->
     <div class="alert success"
-         th:if="${success}"
-         th:text="${success}"></div>
+         th:if="${successMessage != null}"
+         th:text="${successMessage}"></div>
 
     <div class="alert danger"
-         th:if="${error}"
-         th:text="${error}"></div>
+         th:if="${errorMessage != null}"
+         th:text="${errorMessage}"></div>
 
     <!-- ===== Statistics ===== -->
     <section class="stats">
 
         <div class="stat">
-            <span th:text="${totalCustomers}">0</span>
+            <span th:text="${customers != null ? #lists.size(customers) : 0}">0</span>
             <small>Customers</small>
         </div>
 
         <div class="stat">
-            <span th:text="${#numbers.formatDecimal(
-                totalBalance, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+            <span th:text="${totalBalance != null ? #numbers.formatDecimal(totalBalance, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span>
             <small>Total balance (LKR)</small>
         </div>
 
         <div class="stat ok">
-            <span th:text="${successCount}">0</span>
+            <span th:text="${successCount != null ? successCount : 0}">0</span>
             <small>Successful transfers</small>
         </div>
 
         <div class="stat fail">
-            <span th:text="${failedCount}">0</span>
+            <span th:text="${failedCount != null ? failedCount : 0}">0</span>
             <small>Failed transfers</small>
         </div>
 
@@ -77,7 +76,7 @@
                     <select id="fromAccount" th:field="*{fromAccount}">
                         <option value="">-- Select sender --</option>
 
-                        <option th:each="c : ${allCustomers}"
+                        <option th:each="c : ${customers}"
                                 th:unless="${c.accountNumber == '999999'}"
                                 th:value="${c.accountNumber}"
                                 th:text="${c.fullName + ' (' +
@@ -98,7 +97,7 @@
                     <select id="toAccount" th:field="*{toAccount}">
                         <option value="">-- Select receiver --</option>
 
-                        <option th:each="c : ${allCustomers}"
+                        <option th:each="c : ${customers}"
                                 th:unless="${c.accountNumber == '999999'}"
                                 th:value="${c.accountNumber}"
                                 th:text="${c.fullName + ' (' +
@@ -222,7 +221,7 @@
     <section class="card">
         <h2>
             Customers
-            <span class="badge" th:text="${#lists.size(customers)}">0</span>
+            <span class="badge" th:text="${customers != null ? #lists.size(customers) : 0}">0</span>
         </h2>
 
         <form th:action="@{/}" method="get" class="search">
@@ -232,7 +231,7 @@
                    placeholder="Search by name...">
 
             <button type="submit" class="btn small">Search</button>
-            <a th:href="@{ / }" class="btn small">Clear</a>
+            <a th:href="@{/}" class="btn small">Clear</a>
         </form>
 
         <div class="table-wrap">
@@ -248,7 +247,7 @@
                 </thead>
 
                 <tbody>
-                <tr th:if="${#lists.isEmpty(customers)}">
+                <tr th:if="${customers == null or #lists.isEmpty(customers)}">
                     <td colspan="5" class="empty">No customers found.</td>
                 </tr>
 
@@ -294,33 +293,24 @@
                 </thead>
 
                 <tbody>
-                <tr th:if="${#lists.isEmpty(transactions)}">
+                <tr th:if="${transactions == null or #lists.isEmpty(transactions)}">
                     <td colspan="7" class="empty">No transactions yet.</td>
                 </tr>
 
                 <tr th:each="t : ${transactions}">
                     <td th:text="${t.id}"></td>
 
-                    <td th:text="${t.createdAt != null
-                        ? #temporals.format(
-                            t.createdAt, 'yyyy-MM-dd HH:mm:ss')
-                        : '-'}"></td>
+                    <td th:text="${t.createdAt}"></td>
 
-                    <td th:text="${t.fromAccount != null
-                        ? t.fromAccount : '-'}"></td>
+                    <td th:text="${t.fromAccount != null ? t.fromAccount : '-'}"></td>
 
-                    <td th:text="${t.toAccount != null
-                        ? t.toAccount : '-'}"></td>
+                    <td th:text="${t.toAccount != null ? t.toAccount : '-'}"></td>
 
-                    <td class="num"
-                        th:text="${#numbers.formatDecimal(
-                            t.amount, 1, 'COMMA', 2, 'POINT')}">
-                    </td>
+                    <td class="num" th:text="${t.amount}"></td>
 
                     <td>
                         <span class="tag"
-                              th:classappend="${t.status.name() == 'SUCCESS'}
-                                  ? 'ok' : 'fail'"
+                              th:classappend="${#strings.toString(t.status) == 'SUCCESS'} ? 'ok' : 'fail'"
                               th:text="${t.status}">
                         </span>
                     </td>
