@@ -14,32 +14,36 @@
 </header>
 
 <main class="container">
-  <section class="card">
+  <section class="card" th:if="${customer != null}">
     <h2 th:text="${customer.fullName + ' (' + customer.accountNumber + ')'}">Customer</h2>
     <p>Current balance:
-      <strong>LKR <span th:text="${#numbers.formatDecimal(customer.balance, 1, 'COMMA', 2, 'POINT')}"></span></strong>
+      <strong>LKR <span th:text="${customer.balance}"></span></strong>
     </p>
     <p>Total sent (successful transfers, including fees):
-      <strong>LKR <span th:text="${#numbers.formatDecimal(totalSent, 1, 'COMMA', 2, 'POINT')}"></span></strong>
+      <strong>LKR <span th:text="${totalSent}"></span></strong>
     </p>
   </section>
 
   <section class="card">
-    <h2>Transactions <span class="badge" th:text="${#lists.size(transactions)}">0</span></h2>
+    <h2>Transactions <span class="badge" th:text="${transactions != null ? #lists.size(transactions) : 0}">0</span></h2>
     <div class="table-wrap">
       <table>
         <thead>
           <tr><th>ID</th><th>Date &amp; Time</th><th>From</th><th>To</th><th class="num">Amount (LKR)</th><th>Status</th><th>Description</th></tr>
         </thead>
         <tbody>
-          <tr th:if="${#lists.isEmpty(transactions)}"><td colspan="7" class="empty">No transactions for this account.</td></tr>
+          <tr th:if="${transactions == null or #lists.isEmpty(transactions)}">
+            <td colspan="7" class="empty">No transactions for this account.</td>
+          </tr>
           <tr th:each="t : ${transactions}">
             <td th:text="${t.id}"></td>
-            <td th:text="${#temporals.format(t.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${t.createdAt}"></td>
             <td th:text="${t.fromAccount}"></td>
             <td th:text="${t.toAccount}"></td>
-            <td class="num" th:text="${#numbers.formatDecimal(t.amount, 1, 'COMMA', 2, 'POINT')}"></td>
-            <td><span class="tag" th:classappend="${t.status.name() == 'SUCCESS'} ? 'ok' : 'fail'" th:text="${t.status}"></span></td>
+            <td class="num" th:text="${t.amount}"></td>
+            <td>
+              <span class="tag" th:classappend="${#strings.toString(t.status) == 'SUCCESS'} ? 'ok' : 'fail'" th:text="${t.status}"></span>
+            </td>
             <td th:text="${t.description}"></td>
           </tr>
         </tbody>
